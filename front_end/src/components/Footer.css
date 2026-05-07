@@ -1,0 +1,127 @@
+.foot {
+  margin-top: var(--s-10);
+  padding: 0 var(--gutter);
+  max-width: var(--max-w);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.foot .hairline {
+  border-top: 1px solid var(--rule);
+}
+
+.foot-inner {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+  gap: var(--s-7);
+  padding: var(--s-7) 0 var(--s-6);
+}
+
+.foot-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--s-2);
+}
+
+.foot-tag {
+  font-size: 14px;
+  color: var(--ink-soft);
+  max-width: 220px;
+}
+.foot-tag em {
+  font-family: var(--font-display);
+  font-style: italic;
+}
+.foot-tag-tamil {
+  font-family: var(--font-tamil);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--terracotta);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.foot-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  margin-bottom: var(--s-3);
+}
+
+.foot-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.foot-addr {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.foot-mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-mute);
+  display: inline-block;
+  letter-spacing: 0.04em;
+}
+
+.foot-credit {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin-bottom: var(--s-3);
+  max-width: 240px;
+}
+.foot-credit-name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--terracotta);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.foot-stack {
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--rule-soft);
+  line-height: 1.7;
+}
+
+.foot-strap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-mute);
+  padding: var(--s-4) 0 var(--s-7);
+  border-top: 1px solid var(--rule-soft);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.foot-strap-mono {
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 760px) {
+  .foot-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-5);
+  }
+  .foot-strap {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
