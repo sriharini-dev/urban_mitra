@@ -28,21 +28,42 @@ const app = express();
 // for correct req.ip values and any future secure-cookie behaviour.
 app.set("trust proxy", 1);
 
-// Allow the deployed frontend (Vercel) and local Vite dev server to call the API.
-// CORS_ORIGINS is a comma-separated list of allowed origins set in the host env.
-const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:5173")
+// CORS policy. We accept three classes of origin:
+//   1. Anything in CORS_ORIGINS (comma-separated list of explicit origins,
+//      or "*" to disable origin checks entirely).
+//   2. Any localhost / 127.0.0.1 — for Vite dev servers on any port.
+//   3. Any *.vercel.app — so preview deploys and renamed projects work
+//      without re-editing env vars on every push.
+// Disallowed origins receive a 200 with no CORS headers (silent block);
+// the browser blocks the response cleanly instead of seeing a 500-with-HTML.
+const explicitOrigins = (process.env.CORS_ORIGINS || "")
   .split(",")
-  .map((origin) => origin.trim())
+  .map((o) => o.trim())
   .filter(Boolean);
+
+const allowAllOrigins = explicitOrigins.includes("*");
+
+function isOriginAllowed(origin) {
+  if (!origin) return true;                       // curl, cron, same-origin
+  if (allowAllOrigins) return true;
+  if (explicitOrigins.includes(origin)) return true;
+  try {
+    const { hostname } = new URL(origin);
+    if (hostname === "localhost" || hostname === "127.0.0.1") return true;
+    if (hostname.endsWith(".vercel.app")) return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
 
 app.use(
   cors({
     origin(origin, callback) {
-      // Allow same-origin / curl / cron-job requests that send no Origin header.
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error(`Origin ${origin} is not allowed by CORS.`));
+      // Pass false (not an Error) so the response is a clean 200 with no
+      // Access-Control-Allow-Origin header — browser blocks it without the
+      // server emitting an HTML 500 page.
+      callback(null, isOriginAllowed(origin));
     },
     credentials: true
   })
