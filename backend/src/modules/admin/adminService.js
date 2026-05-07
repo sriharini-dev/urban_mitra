@@ -134,7 +134,8 @@ function mapHelperRow(row) {
     pincode: row.pincode,
     gender: row.gender,
     dateOfBirth: row.date_of_birth,
-    skills: JSON.parse(row.skills),
+    // mysql2 v3 auto-parses JSON columns, so row.skills is already an array.
+    skills: row.skills,
     experienceYears: row.experience_years,
     availability: row.availability,
     idProofType: row.id_proof_type,

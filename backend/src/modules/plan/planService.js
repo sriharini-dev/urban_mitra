@@ -74,7 +74,8 @@ function mapPlanRow(row) {
     price: Number(row.price),
     durationDays: row.duration_days,
     visitsPerMonth: row.visits_per_month,
-    features: JSON.parse(row.features),
+    // mysql2 v3 auto-parses JSON columns, so row.features is already an array.
+    features: row.features,
     isActive: Boolean(row.is_active)
   };
 }

@@ -1,5 +1,8 @@
 // Import Express to create the web server.
 const express = require("express");
+const cors = require("cors");
+// Import the shared MySQL connection pool for the health check.
+const pool = require("./config/db");
 // Import user signup routes.
 const userRoutes = require("./modules/user/userRoutes");
 // Import helper signup routes.
@@ -21,18 +24,52 @@ const {
 // Create the Express application instance.
 const app = express();
 
+// Render/Vercel sit a proxy in front of the app, so trust the first hop
+// for correct req.ip values and any future secure-cookie behaviour.
+app.set("trust proxy", 1);
+
+// Allow the deployed frontend (Vercel) and local Vite dev server to call the API.
+// CORS_ORIGINS is a comma-separated list of allowed origins set in the host env.
+const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow same-origin / curl / cron-job requests that send no Origin header.
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origin ${origin} is not allowed by CORS.`));
+    },
+    credentials: true
+  })
+);
+
 // Parse JSON request bodies while tolerating raw pasted line breaks in strings.
 app.use(readJsonBody);
 app.use(parseJsonBody);
 app.use(express.urlencoded({ extended: true }));
 
-// A simple test route to confirm that the backend server is running.
-app.get("/api/health", (req, res) => {
-  // Send a success response back to the client.
-  res.json({
-    success: true,
-    message: "Work Zone backend is running."
-  });
+// Health check that also confirms the database is reachable. The cron-job.org
+// keep-alive ping uses this to keep the Render free instance warm.
+app.get("/api/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    return res.json({
+      success: true,
+      message: "Work Zone backend is running.",
+      database: "connected"
+    });
+  } catch (error) {
+    return res.status(503).json({
+      success: false,
+      message: "Backend is up but the database is unreachable.",
+      database: "disconnected"
+    });
+  }
 });
 
 // Mount all user-related routes under /api/users.
