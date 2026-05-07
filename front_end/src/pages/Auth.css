@@ -1,0 +1,137 @@
+.auth {
+  padding: clamp(48px, 6vw, 96px) var(--gutter);
+}
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: var(--s-9);
+  align-items: start;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.auth-aside {
+  position: sticky;
+  top: 120px;
+  border-right: 1px solid var(--rule);
+  padding-right: var(--s-8);
+}
+.auth-title {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  margin: var(--s-3) 0 var(--s-4);
+}
+.auth-title em { font-style: italic; color: var(--terracotta); }
+.auth-deck {
+  font-size: 16px;
+  color: var(--ink-soft);
+  max-width: 38ch;
+  line-height: 1.6;
+}
+
+.auth-aside-foot {
+  margin-top: var(--s-8);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule-soft);
+}
+.auth-cta-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--s-3);
+}
+
+.auth-form {
+  background: var(--paper-soft);
+  border: 1px solid var(--rule);
+  padding: clamp(24px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-submit {
+  margin-top: var(--s-3);
+  align-self: flex-start;
+}
+
+.auth-foot {
+  margin-top: var(--s-5);
+  font-size: 13px;
+  color: var(--ink-mute);
+}
+
+.auth-demo {
+  margin-top: var(--s-7);
+  padding-top: var(--s-3);
+  border-top: 1px dashed var(--rule);
+  font-size: 12px;
+  color: var(--ink-mute);
+}
+.auth-demo-line {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+
+.auth-form .form-error,
+.auth-form .form-success {
+  margin-bottom: var(--s-4);
+}
+
+.auth-form-wide {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.auth-section {
+  margin-top: var(--s-6);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule-soft);
+}
+.auth-section-h {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: var(--s-4);
+}
+.auth-section-h em { font-style: italic; color: var(--terracotta); }
+
+/* skill chips for helper signup */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.chip {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease-out);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  border-radius: 999px;
+}
+.chip:hover { border-color: var(--ink); }
+.chip-on {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+@media (max-width: 880px) {
+  .auth-grid { grid-template-columns: 1fr; gap: var(--s-6); }
+  .auth-aside {
+    position: static;
+    border-right: 0;
+    padding-right: 0;
+    padding-bottom: var(--s-5);
+    border-bottom: 1px solid var(--rule);
+  }
+}

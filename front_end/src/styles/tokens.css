@@ -1,0 +1,51 @@
+/* ==========================================================================
+   Urban Mitra — design tokens
+   Aesthetic: editorial, print-inspired, warm earth palette
+   ========================================================================== */
+
+:root {
+  /* Color — paper, ink, warm accent */
+  --paper:        #F4ECDF;     /* primary background, warm cream */
+  --paper-deep:   #ECE0CC;     /* secondary surfaces, deeper cream */
+  --paper-soft:   #FAF6EF;     /* lightest paper, for cards */
+  --ink:          #1A1612;     /* primary text, warm-black */
+  --ink-soft:     #4A3F35;     /* secondary text */
+  --ink-mute:     #8C7B6A;     /* muted text, captions */
+  --rule:         #D6C6AE;     /* hairline rules */
+  --rule-soft:    #E5D8C3;     /* lighter rules */
+
+  --terracotta:   #C8533A;     /* primary accent — warm Indian red */
+  --terracotta-d: #A6402A;     /* hover state */
+  --saffron:      #D8842C;     /* secondary accent */
+  --moss:         #4F6B4A;     /* success / verified */
+  --maroon:       #6B2519;     /* deep emphasis */
+
+  /* Typography */
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body:    "Instrument Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+  --font-tamil:   "Noto Serif Tamil", "Fraunces", serif;
+
+  /* Spacing scale — fibonacci-ish for editorial feel */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+
+  /* Layout */
+  --max-w: 1280px;
+  --gutter: clamp(20px, 4vw, 48px);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-quick: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 600ms;
+}
