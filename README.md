@@ -1,98 +1,202 @@
-# Work Zone
+<div align="center">
 
-## Project Problem Statement
+# Urban Mitra
 
-Work Zone is a subscription-based home services app that solves a simple but real problem: urban households, especially working couples and elderly people, are tired of juggling multiple unreliable apps and random service providers for everyday chores.
+**One reliable person, not five apps.**
 
-Instead of booking a cleaner from one app, a cook from another, and a grocery runner from a third, Work Zone gives users one trusted, background-verified helper who handles everything under a single monthly subscription.
+A subscription-based home-services platform where one trusted, background-verified helper handles cleaning, cooking, laundry, pet walks and grocery runs — under one monthly plan, managed inside one calm app.
 
-Services can include:
+[![Frontend](https://img.shields.io/badge/Frontend-Vercel-black?style=flat-square)](https://vercel.com)
+[![Backend](https://img.shields.io/badge/Backend-Render-purple?style=flat-square)](https://urban-mitra.onrender.com/api/health)
+[![Database](https://img.shields.io/badge/Database-Aiven_MySQL-orange?style=flat-square)](https://aiven.io)
+[![Stack](https://img.shields.io/badge/Stack-React_·_Express_·_MySQL-c8533a?style=flat-square)]()
 
-- cleaning
-- cooking
-- laundry
-- pet walking
-- grocery runs
+</div>
 
-The platform works like a part-time household assistant managed through a website. Users can pick a plan, book time slots, track tasks, and pay online. This removes the need for calls, cash, and managing multiple providers.
+---
 
-Helpers also benefit from the platform by getting a structured system to find consistent work, manage schedules, and build a verified reputation through ratings and earnings tracking.
+## The product, in 30 seconds
 
-An admin layer manages:
+Urban households — especially working couples and elderly parents — juggle multiple unreliable apps for daily chores. Urban Mitra collapses all of that into **one verified helper, one subscription, one app**.
 
-- verification
-- payments
-- commissions
-- complaint resolution
+- **Customers** pick a plan, book time slots, track tasks, pay online.
+- **Helpers** get a structured roster of homes, build a verified reputation, manage their schedule.
+- **Admins** verify helpers, assign bookings, resolve issues — all from a single dashboard.
 
-The core idea is simple:
+---
 
-**People do not want five apps. They want one reliable person.**
+## Architecture at a glance
 
-Work Zone turns that reliability into a single product experience.
+```
+   ┌──────────────┐   HTTPS    ┌──────────────┐    TLS     ┌──────────────┐
+   │   VERCEL     │──────────▶│    RENDER    │──────────▶│ AIVEN MySQL  │
+   │ React + Vite │            │  Node + Exp. │            │   8.0 · 1 GB │
+   │  edge CDN    │            │ stateless API│            │ ssl required │
+   └──────────────┘            └──────────────┘            └──────────────┘
+                                       ▲
+                                       │ /api/health every 14 min
+                                ┌──────┴───────┐
+                                │ cron-job.org │ (defeats Render cold start)
+                                └──────────────┘
+```
 
-## Project Duration
+**Layered (clean architecture):**
 
-- Start Date: April 29, 2026
-- End Date: May 4, 2026
+```
+   Routes  →  Controller  →  Service  →  Validator
+                                ▼
+                          mysql2 pool (db.js)
+                                ▼
+                            Aiven MySQL
+```
 
-## Project Planning
+For the deep version (per-flow data flows, error code map, env var matrix) see the architecture document in `docs/` *(or paste the longer doc your team keeps separately)*.
 
-1. **April 29, 2026**
-   Backend setup, folder structure, SQL database setup, and basic server setup.
+---
 
-2. **April 30, 2026**
-   Create database tables and backend APIs for users, helpers, plans, and bookings.
+## Tech stack
 
-3. **May 1, 2026**
-   Complete backend testing and start frontend setup with React.
+| Layer | Choice | Why |
+|---|---|---|
+| **Frontend** | React 19 + Vite + react-router-dom + axios | Fast dev loop, no framework lock-in, easy to explain in an interview |
+| **Styling** | Plain CSS with CSS variables (no Tailwind, no UI lib) | Editorial print aesthetic — Fraunces (display) + Instrument Sans (body) + Noto Serif Tamil |
+| **Backend** | Node 18+ · Express 4 · mysql2 · jsonwebtoken · bcryptjs | Battle-tested, no surprises |
+| **Database** | MySQL 8.0 (Aiven free tier) | Real MySQL, no compatibility quirks |
+| **Auth** | JWT (Bearer token, 7-day expiry) | Stateless, fits free-tier serverless model |
+| **Deploy** | Vercel (frontend) · Render (API) · Aiven (DB) | Free tier all the way |
 
-4. **May 2, 2026**
-   Build frontend pages like home, plans, login, signup, and booking.
+---
 
-5. **May 3, 2026**
-   Connect frontend with backend and create dashboard pages.
+## Repo layout
 
-6. **May 4, 2026**
-   Final testing, bug fixes, responsive design, and project completion.
+```
+urban_mitra/
+├── backend/
+│   ├── src/
+│   │   ├── app.js                  # express wiring · CORS · /api/health
+│   │   ├── server.js               # entrypoint
+│   │   ├── config/db.js            # mysql2 pool with SSL support
+│   │   ├── middleware/
+│   │   │   ├── authMiddleware.js   # authenticateToken · authorizeRoles
+│   │   │   └── jsonBodyParser.js   # tolerant JSON parser
+│   │   └── modules/                # 6 modules · same shape each:
+│   │       ├── auth/               #   Routes → Controller → Service → Validator
+│   │       ├── user/
+│   │       ├── helper/
+│   │       ├── plan/
+│   │       ├── booking/
+│   │       └── admin/
+│   ├── database/
+│   │   ├── schema.sql              # 4 tables · ENUMs · FKs
+│   │   └── seed.sql                # admin + 3 plans · idempotent
+│   ├── .env.example
+│   └── package.json
+│
+├── front_end/
+│   ├── src/
+│   │   ├── main.jsx                # Router + AuthProvider bootstrap
+│   │   ├── App.jsx                 # route table + role-gated routes
+│   │   ├── api/client.js           # axios + JWT interceptor
+│   │   ├── auth/AuthContext.jsx    # localStorage-synced token + user
+│   │   ├── routes/PrivateRoute.jsx # role gate
+│   │   ├── components/             # Navbar · Footer
+│   │   ├── pages/                  # Home · Plans · Login · 2 signups ·
+│   │   │                           # BookService · 3 dashboards
+│   │   └── styles/                 # tokens.css · global.css
+│   ├── vercel.json                 # SPA rewrite to index.html
+│   └── package.json
+│
+└── README.md
+```
 
-## Interview Preparation
+---
 
-### How To Explain The Website In An Interview
+## Run locally
 
-When explaining Work Zone in an interview, focus on these points:
+### Prerequisites
+- Node 18+ · npm
+- A MySQL 8.0 instance (Aiven free tier works) — credentials handy
 
-1. **Problem**
-   Urban households struggle to manage multiple apps and unreliable service providers for daily home tasks.
+### Backend
+```bash
+cd backend
+cp .env.example .env       # then fill in DB_* and JWT_SECRET
+npm install
+mysql -h <host> -u <user> -p <db> < database/schema.sql
+mysql -h <host> -u <user> -p <db> < database/seed.sql
+npm run dev                # http://localhost:5000
+```
 
-2. **Solution**
-   Work Zone provides one trusted helper through a subscription-based platform for services like cleaning, cooking, laundry, pet walking, and grocery runs.
+`.env` template:
+```bash
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=work_zone
+DB_SSL=false               # true for Aiven / hosted MySQL
+JWT_SECRET=<generate with: node -e "console.log(require('crypto').randomBytes(48).toString('hex'))">
+PORT=5000
+CORS_ORIGINS=http://localhost:5173
+```
 
-3. **Target Users**
-   Working couples, elderly people, and busy families who want convenience and reliability.
+### Frontend
+```bash
+cd front_end
+cp .env.example .env       # set VITE_API_BASE_URL=http://localhost:5000
+npm install
+npm run dev                # http://localhost:5173
+```
 
-4. **Main Features**
-   User registration, service plans, booking system, helper assignment, user dashboard, helper dashboard, and admin management.
+---
 
-5. **Technology Used**
-   React for frontend, JavaScript with backend framework, and SQL for database management.
+## Demo credentials
 
-6. **Your Role**
-   Explain what you designed and developed, such as backend APIs, database tables, frontend pages, dashboard flow, and integration.
+```
+Email     admin@workzone.com
+Password  Admin@123
+```
 
-7. **Challenges**
-   Discuss time limits, managing both frontend and backend in the same timeline, and how you reduced the scope to an MVP.
+Loaded automatically by `backend/database/seed.sql` (bcrypt hash baked in). Customer and helper accounts are created via signup forms.
 
-8. **Outcome**
-   The website provides a single platform where users can manage household services more easily and efficiently.
+---
 
-### Common Interview Questions
+## API surface
 
-1. Why did you choose this project?
-2. What problem does Work Zone solve?
-3. Why did you choose React for frontend?
-4. Why did you use SQL in the backend?
-5. What are the main modules in the system?
-6. What challenges did you face while building it?
-7. How does the booking system work?
-8. What improvements would you add in the future?
+All responses follow `{ success: true|false, message?, data?|... }`. JWT goes in `Authorization: Bearer <token>`.
+
+| Method · Path | Auth | Roles |
+|---|---|---|
+| `GET /api/health` | public | — |
+| `POST /api/users/signup` | public | — |
+| `POST /api/helpers/signup` | public | — |
+| `POST /api/auth/login` | public | — |
+| `GET /api/plans` | public | — |
+| `POST /api/plans` | required | admin |
+| `POST /api/bookings` | required | user |
+| `GET /api/bookings/my` | required | user, helper, admin |
+| `PATCH /api/bookings/:id/status` | required | admin |
+| `GET /api/admin/overview` | required | admin |
+| `GET /api/admin/helpers?status=` | required | admin |
+| `PATCH /api/admin/helpers/:id/status` | required | admin |
+
+---
+
+## Key design decisions
+
+- **Shared login endpoint** — one `POST /api/auth/login` for all three roles; the JWT carries the role and the frontend redirects accordingly.
+- **Helper signup is transactional** — `users` and `helper_profiles` insert inside `pool.getConnection() + beginTransaction()` so neither row exists without the other.
+- **Pending → active flow** — every helper signs up with `status='pending'`. Login is blocked until an admin approves them via `PATCH /api/admin/helpers/:id/status`.
+- **Coded service errors** — services throw `Error` with a `code` (`DUPLICATE_EMAIL`, `ACCOUNT_PENDING`, `PLAN_NOT_FOUND`, …). Controllers map codes → HTTP status. No HTML stack traces, no silent `catch{}`.
+- **Permissive CORS for free deploys** — auto-allows `localhost:*` and `*.vercel.app` so preview URLs "just work" without env-var changes.
+- **Editorial design over generic SaaS** — Fraunces serif, terracotta accent, paper-cream background, subtle grain. The headline strikes through "five apps" with a hand-drawn line.
+
+## Built by
+
+<div align="center">
+
+**Sri-Harini** *(Frontend & full-stack integration)*
+
+Backend scaffolded as part of the Work Zone project · Hosted on free-tier infrastructure for portfolio demonstration · This is **not** a real commercial service.
+
+</div>
