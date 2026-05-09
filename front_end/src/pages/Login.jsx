@@ -97,7 +97,7 @@ export default function Login() {
           </div>
 
           <div className="auth-demo">
-            <span className="eyebrow">Demo credentials</span>
+            <span className="eyebrow">Admin credentials</span>
             <p className="auth-demo-line">
               <span>admin@workzone.com</span> · <span className="tabular">Admin@123</span>
             </p>
