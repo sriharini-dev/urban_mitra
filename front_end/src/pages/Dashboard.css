@@ -73,6 +73,11 @@
   align-items: center;
   border-top: 1px solid var(--rule-soft);
 }
+/* Admin bookings table has an extra "Helper" column. */
+.dash-table-bookings .dash-table-head,
+.dash-table-bookings .dash-row {
+  grid-template-columns: 50px 1fr 0.9fr 1.1fr 1.3fr 150px 130px;
+}
 .dash-table-head {
   font-family: var(--font-mono);
   font-size: 10px;

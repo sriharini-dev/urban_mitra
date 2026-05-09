@@ -57,14 +57,35 @@ export default function AdminDashboard() {
     }
   }
 
-  async function updateBookingStatus(id, status) {
+  // Update status and/or helper assignment in one call. The backend's
+  // PATCH /api/bookings/:id/status requires `status`, so we always include
+  // the current status when only helperId is changing.
+  async function updateBooking(id, partial) {
     try {
-      await client.patch(`/api/bookings/${id}/status`, { status });
+      const current = bookings.find((b) => b.id === id);
+      const body = { status: partial.status ?? current.status };
+      if (partial.helperId !== undefined) {
+        body.helperId = partial.helperId === "" ? null : Number(partial.helperId);
+      }
+      await client.patch(`/api/bookings/${id}/status`, body);
       await fetchAll();
     } catch (e) {
       setError(e.userMessage);
     }
   }
+
+  // Picking a helper auto-promotes status to "assigned" unless the booking
+  // is already completed or cancelled.
+  function onAssignHelper(booking, helperIdString) {
+    const isLocked = booking.status === "completed" || booking.status === "cancelled";
+    const shouldAutoAssign = helperIdString && !isLocked && booking.status !== "assigned";
+    updateBooking(booking.id, {
+      helperId: helperIdString,
+      ...(shouldAutoAssign ? { status: "assigned" } : {})
+    });
+  }
+
+  const activeHelpers = helpers.filter((h) => h.status === "active");
 
   return (
     <div className="dash page">
@@ -194,13 +215,14 @@ export default function AdminDashboard() {
         {bookings.length === 0 ? (
           <p style={{ color: "var(--ink-mute)" }}>No bookings yet.</p>
         ) : (
-          <div className="dash-table">
+          <div className="dash-table dash-table-bookings">
             <div className="dash-table-head">
               <span>#</span>
               <span>Plan</span>
               <span>Date</span>
               <span>Slot</span>
               <span>Where</span>
+              <span>Helper</span>
               <span>Status</span>
             </div>
             {bookings.map((b, i) => (
@@ -219,8 +241,22 @@ export default function AdminDashboard() {
                 <span>
                   <select
                     className="dash-status-select"
+                    value={b.helperId || ""}
+                    onChange={(e) => onAssignHelper(b, e.target.value)}
+                    disabled={activeHelpers.length === 0}
+                    title={activeHelpers.length === 0 ? "No active helpers yet" : ""}
+                  >
+                    <option value="">— unassigned —</option>
+                    {activeHelpers.map((h) => (
+                      <option key={h.id} value={h.id}>{h.fullName}</option>
+                    ))}
+                  </select>
+                </span>
+                <span>
+                  <select
+                    className="dash-status-select"
                     value={b.status}
-                    onChange={(e) => updateBookingStatus(b.id, e.target.value)}
+                    onChange={(e) => updateBooking(b.id, { status: e.target.value })}
                   >
                     {BOOKING_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
